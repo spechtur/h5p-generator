@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H5P KI-Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+  :root {
+    --bg: #F7F4EF; --card: #FFFFFF; --accent: #D4501A; --accent-light: #F5E6DF;
+    --text: #1C1C1A; --text-muted: #7A7A72; --border: #E2DAD0;
+    --green: #3A7D44; --green-light: #EAF4EC; --blue: #2D6A8F; --blue-light: #E8F2F8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 28px 16px 48px; max-width: 680px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 28px; }
+  .header .eyebrow { font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 6px; }
+  .header h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: clamp(22px,4vw,28px); margin-bottom: 8px; }
+  .header p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  .type-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .type-btn { flex: 1; min-width: 100px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--card); cursor: pointer; text-align: center; transition: all .18s; font-family: 'DM Sans', sans-serif; }
+  .type-btn .type-icon { font-size: 20px; margin-bottom: 3px; }
+  .type-btn .type-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .type-btn:hover { border-color: var(--accent); }
+  .type-btn.active { border-color: var(--accent); background: var(--accent-light); }
+
+  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+
+  label { display: block; font-size: 12px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+
+  input[type=text], textarea {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg);
+    outline: none; transition: border-color .2s; margin-bottom: 14px;
+  }
+  input[type=text]:focus, textarea:focus { border-color: var(--accent); background: white; }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  .hint-box { background: var(--blue-light); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--blue); line-height: 1.6; margin-bottom: 14px; border-left: 3px solid var(--blue); }
+  .hint-box strong { font-weight: 500; }
+
+  .example-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all .15s; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  .generate-btn { width: 100%; height: 52px; background: var(--accent); color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; cursor: pointer; transition: all .18s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .generate-btn:hover { background: #b8401a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(212,80,26,.3); }
+  .generate-btn:disabled { background: var(--border); color: var(--text-muted); transform: none; box-shadow: none; cursor: not-allowed; }
+
+  .status-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px; display: none; }
+  .status-box.visible { display: block; }
+  .status-steps { display: flex; flex-direction: column; gap: 10px; }
+  .step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-muted); }
+  .step .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; transition: all .3s; }
+  .step.active .dot { background: var(--accent); color: white; animation: pulse 1s infinite; }
+  .step.done .dot { background: var(--green); color: white; }
+  .step.active { color: var(--text); font-weight: 500; }
+  .step.done { color: var(--green); }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+  .success-box { background: var(--green-light); border: 1px solid var(--green); border-radius: 12px; padding: 16px 20px; margin-top: 14px; font-size: 14px; color: var(--green); line-height: 1.6; display: none; }
+  .error-box { background: #FDEDEC; border: 1px solid #C0392B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; font-size: 14px; color: #C0392B; line-height: 1.6; display: none; }
+
+  footer { text-align: center; margin-top: 32px; font-size: 11px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="eyebrow">H5P KI-Generator</div>
+  <h1>Beschreiben. Generieren. Fertig.</h1>
+  <p>Sag Claude, was du brauchst – er baut das H5P-File, du lädst es hoch.</p>
+</div>
+
+<div class="type-selector">
+  <button class="type-btn active" onclick="setType('blanks')">
+    <div class="type-icon">✎</div><div class="type-name">Lückentext</div>
+  </button>
+  <button class="type-btn" onclick="setType('multichoice')">
+    <div class="type-icon">◉</div><div class="type-name">Multiple Choice</div>
+  </button>
+  <button class="type-btn" onclick="setType('accordion')">
+    <div class="type-icon">☰</div><div class="type-name">Accordion</div>
+  </button>
+  <button class="type-btn" onclick="setType('truefalse')">
+    <div class="type-icon">⊙</div><div class="type-name">True / False</div>
+  </button>
+</div>
+
+<div class="form-card">
+  <div id="hint-blanks" class="hint-box">
+    <strong>Lückentext:</strong> Beschreibe Thema, Niveau und welche Wörter als Lücken erscheinen sollen. Claude schreibt den Text und markiert die Lücken automatisch.
+  </div>
+  <div id="hint-multichoice" class="hint-box" style="display:none">
+    <strong>Multiple Choice:</strong> Beschreibe das Thema und die gewünschte Schwierigkeit. Claude generiert Frage, richtige Antwort und plausible Distraktoren.
+  </div>
+  <div id="hint-accordion" class="hint-box" style="display:none">
+    <strong>Accordion:</strong> Beschreibe das Thema und wie viele Panels du möchtest. Claude erstellt Titel und Inhalte für jedes Panel.
+  </div>
+  <div id="hint-truefalse" class="hint-box" style="display:none">
+    <strong>True / False:</strong> Beschreibe das Thema. Claude formuliert eine klare Aussage und bestimmt, ob sie richtig oder falsch ist.
+  </div>
+
+  <label>Dein Auftrag an Claude</label>
+  <textarea id="prompt" placeholder="z.B.: Erstelle einen Lückentext über das Schweizer Schulsystem für Lehrpersonen. Mache alle Kantone und Schulstufen als Lücken."></textarea>
+
+  <label>Beispiele (anklicken zum Übernehmen)</label>
+  <div class="example-chips" id="example-chips"></div>
+
+  <label>Titel (für Moodle)</label>
+  <input type="text" id="h5p-title" placeholder="z.B. Lückentext: Schweizer Schulsystem">
+</div>
+
+<button class="generate-btn" id="gen-btn" onclick="generate()">
+  <span>✦</span> Mit Claude generieren & herunterladen
+</button>
+
+<div class="status-box" id="status-box">
+  <div class="status-steps">
+    <div class="step" id="step-1"><div class="dot">1</div><span>Claude generiert den Inhalt...</span></div>
+    <div class="step" id="step-2"><div class="dot">2</div><span>H5P-Struktur wird aufgebaut...</span></div>
+    <div class="step" id="step-3"><div class="dot">3</div><span>ZIP-Datei wird erstellt...</span></div>
+  </div>
+</div>
+
+<div class="success-box" id="success-box">
+  ✓ &nbsp;Datei heruntergeladen. In Moodle unter <strong>Material anlegen → H5P → Datei hochladen</strong> einfügen.
+</div>
+<div class="error-box" id="error-box"></div>
+
+<div style="background:white;border:1px solid #E2DAD0;border-radius:14px;padding:18px;margin-bottom:14px">
+  <div style="font-size:13px;font-weight:500;color:#1C1C1A;margin-bottom:12px">⚙ Verbindung</div>
+  <label style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#7A7A72;display:block;margin-bottom:5px">Worker-URL</label>
+  <input type="text" id="worker-url" placeholder="https://h5p-generator-proxy.david-halser.workers.dev" style="width:100%;padding:10px 12px;border:1.5px solid #E2DAD0;border-radius:9px;font-family:inherit;font-size:13px;color:#1C1C1A;background:#F7F4EF;outline:none;margin-bottom:10px">
+  <label style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#7A7A72;display:block;margin-bottom:5px">Passwort</label>
+  <input type="password" id="access-token" placeholder="Zugangspasswort" style="width:100%;padding:10px 12px;border:1.5px solid #E2DAD0;border-radius:9px;font-family:inherit;font-size:13px;color:#1C1C1A;background:#F7F4EF;outline:none">
+</div>
+
+<footer>H5P KI-Generator · PHGR · David Halser · Powered by Claude</footer>
+
+<script>
+let currentType = 'blanks';
+
+const EXAMPLES = {
+  blanks: [
+    'Lückentext über Fotosynthese für die Mittelstufe, alle Fachbegriffe als Lücken',
+    'Text über die Schweizer Demokratie, politische Begriffe als Lücken',
+    'Lückentext: Pädagogische Grundbegriffe für Lehrpersonen in Ausbildung',
+    'Text über KI im Alltag, technische Begriffe als Lücken'
+  ],
+  multichoice: [
+    'Frage über Urheberrecht im Bildungsbereich, mittelschwer',
+    'Multiple Choice: Was ist Kultur der Digitalität? 4 Antworten',
+    'Quizfrage über Lerntheorien für Lehrpersonen, 3 Distraktoren',
+    'Frage über Datenschutz in der Schule'
+  ],
+  accordion: [
+    '5 Panels über die Merkmale guten Unterrichts',
+    'Accordion: 4 Phasen des Design Thinking erklärt',
+    '6 Strukturprinzipien der Didaktik im Zeitalter von KI',
+    'FAQ: Häufige Fragen von Lehrpersonen zu KI im Unterricht'
+  ],
+  truefalse: [
+    'Aussage über die Wirkung von Hausaufgaben, überraschend falsch',
+    'True/False: KI kann kreatives Denken vollständig ersetzen',
+    'Aussage über Lernstile – die Forschung widerspricht dem Mythos',
+    'Frage über Bildschirmzeit und Lernleistung'
+  ]
+};
+
+const SYSTEM_PROMPTS = {
+  blanks: `Du bist ein H5P-Content-Generator. Erstelle einen H5P.Blanks Lückentext.
+Gib NUR ein valides JSON-Objekt zurück – kein Markdown, keine Erklärung, kein Code-Block.
+
+Format:
+{
+  "media": {"type": {"params": {}}},
+  "questions": [
+    "<p>Satz mit *Lücke1* und weiterem Text mit *Lücke2*.</p>",
+    "<p>Zweiter Satz mit *Lücke3*.</p>"
+  ],
+  "overallFeedback": [{"from": 0, "to": 100, "feedback": ""}],
+  "showSolutions": "Lösung anzeigen",
+  "tryAgain": "Nochmal versuchen",
+  "checkAnswer": "Überprüfen",
+  "notFilledOut": "Bitte alle Lücken ausfüllen",
+  "answerIsCorrect": "':ans' ist korrekt",
+  "answerIsWrong": "':ans' ist falsch",
+  "answeredCorrectly": "Richtig beantwortet",
+  "answeredIncorrectly": "Falsch beantwortet",
+  "solutionLabel": "Richtige Antwort:",
+  "inputLabel": "Lücke @num von @total",
+  "inputHasTipLabel": "Tipp verfügbar",
+  "tipLabel": "Tipp",
+  "behaviour": {
+    "enableRetry": true, "enableSolutionsButton": true, "autoCheck": false,
+    "caseSensitive": false, "showSolutionsRequiresInput": true, "separateLines": false,
+    "confirmCheckDialog": false, "confirmRetryDialog": false, "acceptSpellingErrors": false
+  }
+}
+
+Regeln: Lücken mit *Sternchen* markieren. 4-8 Sätze, je 1-3 Lücken. Auf Deutsch.`,
+
+  multichoice: `Du bist ein H5P-Content-Generator. Erstelle eine H5P.MultiChoice Frage.
+Gib NUR ein valides JSON-Objekt zurück – kein Markdown, keine Erklärung.
+
+Format:
+{
+  "media": {"type": {"params": {}}, "disableImageZooming": false},
+  "answers": [
+    {"correct": true, "tipsAndFeedback": {"tip": "", "chosenFeedback": "", "notChosenFeedback": ""}, "params": {"correct": true, "text": "Richtige Antwort"}},
+    {"correct": false, "tipsAndFeedback": {"tip": "", "chosenFeedback": "", "notChosenFeedback": ""}, "params": {"correct": false, "text": "Falsche Antwort 1"}},
+    {"correct": false, "tipsAndFeedback": {"tip": "", "chosenFeedback": "", "notChosenFeedback": ""}, "params": {"correct": false, "text": "Falsche Antwort 2"}},
+    {"correct": false, "tipsAndFeedback": {"tip": "", "chosenFeedback": "", "notChosenFeedback": ""}, "params": {"correct": false, "text": "Falsche Antwort 3"}}
+  ],
+  "question": "<p>Fragetext hier?</p>",
+  "behaviour": {"enableRetry": true, "enableSolutionsButton": true, "enableCheckButton": true, "type": "auto", "singlePoint": false, "randomAnswers": true, "showSolutionsRequiresInput": true, "confirmCheckDialog": false, "confirmRetryDialog": false, "autoCheck": false, "passPercentage": 100, "showScorePoints": true},
+  "UI": {"checkAnswerButton": "Überprüfen", "showSolutionButton": "Lösung anzeigen", "tryAgainButton": "Nochmal", "scoreBarLabel": "Du hast :num von :total Punkten."},
+  "confirmCheck": {"header": "Bist du sicher?", "body": "Antwort abschicken?", "cancelLabel": "Abbrechen", "confirmLabel": "Ja"},
+  "confirmRetry": {"header": "Bist du sicher?", "body": "Nochmal versuchen?", "cancelLabel": "Abbrechen", "confirmLabel": "Ja"},
+  "overallFeedback": [{"from": 0, "to": 100, "feedback": ""}]
+}
+Genau 1 richtige und 3 falsche Antworten. Auf Deutsch.`,
+
+  accordion: `Du bist ein H5P-Content-Generator. Erstelle ein H5P.Accordion.
+Gib NUR ein valides JSON-Objekt zurück – kein Markdown, keine Erklärung.
+
+Format:
+{
+  "panels": [
+    {"title": "Panel-Titel 1", "content": {"library": "H5P.AdvancedText 1.1", "params": {"text": "<p>Inhalt des ersten Panels.</p>"}, "subContentId": "PLACEHOLDER_1"}},
+    {"title": "Panel-Titel 2", "content": {"library": "H5P.AdvancedText 1.1", "params": {"text": "<p>Inhalt des zweiten Panels.</p>"}, "subContentId": "PLACEHOLDER_2"}}
+  ]
+}
+
+Erstelle so viele Panels wie gewünscht. Inhalte können HTML enthalten. Auf Deutsch.`,
+
+  truefalse: `Du bist ein H5P-Content-Generator. Erstelle eine H5P.TrueFalse Aufgabe.
+Gib NUR ein valides JSON-Objekt zurück – kein Markdown, keine Erklärung.
+
+Format:
+{
+  "media": {"type": {"params": {}}, "disableImageZooming": false},
+  "correct": "true",
+  "question": "Die Aussage hier.",
+  "l10n": {"trueText": "Richtig", "falseText": "Falsch", "score": "Du hast @score von @total Punkten.", "checkAnswer": "Überprüfen", "showSolutionButton": "Lösung anzeigen", "tryAgain": "Nochmal", "wrongAnswerMessage": "Leider falsch.", "correctAnswerMessage": "Richtig!", "trueAnswerText": "Die korrekte Antwort ist 'Richtig'", "falseAnswerText": "Die korrekte Antwort ist 'Falsch'"},
+  "behaviour": {"enableRetry": true, "enableSolutionsButton": true, "confirmCheckDialog": false, "confirmRetryDialog": false, "autoCheck": false},
+  "confirmCheck": {"header": "Bist du sicher?", "body": "Antwort abschicken?", "cancelLabel": "Abbrechen", "confirmLabel": "Ja"},
+  "confirmRetry": {"header": "Bist du sicher?", "body": "Nochmal versuchen?", "cancelLabel": "Abbrechen", "confirmLabel": "Ja"}
+}
+
+"correct" ist entweder "true" oder "false". Auf Deutsch.`
+};
+
+const DEPS = {
+  blanks: [{machineName:'H5P.Blanks', majorVersion:'1', minorVersion:'14'}],
+  multichoice: [{machineName:'H5P.MultiChoice', majorVersion:'1', minorVersion:'16'}],
+  accordion: [
+    {machineName:'H5P.Accordion', majorVersion:'1', minorVersion:'0'},
+    {machineName:'H5P.AdvancedText', majorVersion:'1', minorVersion:'1'}
+  ],
+  truefalse: [{machineName:'H5P.TrueFalse', majorVersion:'1', minorVersion:'8'}]
+};
+
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+  });
+}
+
+function setType(type) {
+  currentType = type;
+  document.querySelectorAll('.type-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['blanks','multichoice','accordion','truefalse'][i] === type);
+  });
+  ['blanks','multichoice','accordion','truefalse'].forEach(t => {
+    document.getElementById(`hint-${t}`).style.display = t === type ? 'block' : 'none';
+  });
+  renderChips();
+  document.getElementById('prompt').value = '';
+  document.getElementById('prompt').placeholder = EXAMPLES[type][0];
+}
+
+function renderChips() {
+  const container = document.getElementById('example-chips');
+  container.innerHTML = '';
+  EXAMPLES[currentType].forEach(ex => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = ex;
+    chip.onclick = () => { document.getElementById('prompt').value = ex; };
+    container.appendChild(chip);
+  });
+}
+
+function setStep(n, state) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`step-${i}`);
+    el.className = 'step' + (i === n ? ` ${state}` : i < n ? ' done' : '');
+    el.querySelector('.dot').textContent = i < n ? '✓' : i;
+  }
+}
+
+async function generate() {
+  const prompt = document.getElementById('prompt').value.trim();
+  const title = document.getElementById('h5p-title').value.trim() || 'H5P Inhalt';
+  if (!prompt) { alert('Bitte beschreibe, was du möchtest.'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+
+  const statusBox = document.getElementById('status-box');
+  statusBox.className = 'status-box visible';
+  document.getElementById('success-box').style.display = 'none';
+  document.getElementById('error-box').style.display = 'none';
+
+  setStep(1, 'active');
+
+  try {
+    const workerUrl = document.getElementById('worker-url').value.trim();
+    const accessToken = document.getElementById('access-token').value.trim();
+    if (!workerUrl || !accessToken) throw new Error('Bitte Worker-URL und Passwort eingeben.');
+
+    const response = await fetch(workerUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Access-Token': accessToken
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPTS[currentType],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const rawText = data.content?.[0]?.text || '';
+
+    setStep(2, 'active');
+
+    // JSON parsen – Markdown-Fences entfernen falls vorhanden
+    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    let contentJson;
+    try {
+      contentJson = JSON.parse(cleaned);
+    } catch(e) {
+      throw new Error('Claude hat kein valides JSON zurückgegeben. Versuche es nochmals.');
+    }
+
+    // UUIDs für Accordion-Panels ersetzen
+    if (currentType === 'accordion' && contentJson.panels) {
+      contentJson.panels.forEach((p, i) => {
+        if (p.content) p.content.subContentId = uuid();
+      });
+    }
+
+    setStep(3, 'active');
+
+    // H5P JSON bauen
+    const h5pJson = {
+      title,
+      language: 'U',
+      mainLibrary: DEPS[currentType][0].machineName,
+      license: 'U',
+      embedTypes: ['div'],
+      preloadedDependencies: DEPS[currentType]
+    };
+
+    // ZIP erstellen
+    const zip = new JSZip();
+    zip.file('h5p.json', JSON.stringify(h5pJson, null, 2));
+    zip.file('content/content.json', JSON.stringify(contentJson, null, 2));
+    Object.keys(zip.files).forEach(k => { if (zip.files[k].dir) delete zip.files[k]; });
+
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${title.replace(/[^a-zA-Z0-9äöüÄÖÜ]/g,'_')}.h5p`;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 300);
+
+    setStep(3, 'done');
+    document.getElementById('success-box').style.display = 'block';
+
+  } catch(e) {
+    const errBox = document.getElementById('error-box');
+    errBox.style.display = 'block';
+    errBox.textContent = '✗ Fehler: ' + e.message;
+    statusBox.className = 'status-box';
+  }
+
+  btn.disabled = false;
+}
+
+// Init
+renderChips();
+</script>
+</body>
+</html>
