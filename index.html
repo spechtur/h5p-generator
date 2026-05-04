@@ -332,7 +332,7 @@ async function generate() {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        max_tokens: 2000,
         system: SYSTEM_PROMPTS[currentType],
         messages: [{ role: 'user', content: prompt }]
       })
@@ -343,13 +343,20 @@ async function generate() {
 
     setStep(2, 'active');
 
-    // JSON parsen – Markdown-Fences entfernen falls vorhanden
-    const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    // JSON robust extrahieren
     let contentJson;
     try {
-      contentJson = JSON.parse(cleaned);
+      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      try {
+        contentJson = JSON.parse(cleaned);
+      } catch(e) {
+        const start = cleaned.indexOf('{');
+        const end = cleaned.lastIndexOf('}');
+        if (start === -1 || end === -1) throw new Error('Kein JSON gefunden');
+        contentJson = JSON.parse(cleaned.slice(start, end + 1));
+      }
     } catch(e) {
-      throw new Error('Claude hat kein valides JSON zurückgegeben. Versuche es nochmals.');
+      throw new Error('Claude hat kein valides JSON zurückgegeben – nochmals versuchen.');
     }
 
     // UUIDs für Accordion-Panels ersetzen
