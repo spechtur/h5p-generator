@@ -137,8 +137,9 @@
     <label>YouTube-URL</label>
     <div class="url-row">
       <span class="url-icon">▶</span>
-      <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+      <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=..." oninput="validateYtUrl(this)">
     </div>
+    <div id="yt-url-feedback" style="font-size:12px;margin-top:-10px;margin-bottom:10px;display:none"></div>
     <label>Videobeschreibung mit Zeitstempeln <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-muted)">– optional, aber empfohlen</span></label>
     <textarea id="video-desc" style="min-height:72px" placeholder="z.B.: 8-minütiges Erklärvideo zum SAMR-Modell. 0:00 Einleitung, 1:20 Substitution (analoge Werkzeuge ersetzen), 2:50 Augmentation, 4:30 Modification, 6:10 Redefinition, 7:30 Fazit."></textarea>
     <hr class="divider">
@@ -377,6 +378,21 @@ function uuid() {
   });
 }
 
+function validateYtUrl(input) {
+  const fb = document.getElementById('yt-url-feedback');
+  if (!input.value.trim()) { fb.style.display = 'none'; return; }
+  const id = extractYouTubeId(input.value.trim());
+  if (id) {
+    fb.style.display = 'block';
+    fb.style.color = 'var(--green)';
+    fb.textContent = `✓ Video-ID erkannt: ${id}`;
+  } else {
+    fb.style.display = 'block';
+    fb.style.color = '#C0392B';
+    fb.textContent = '✗ Keine gültige YouTube-URL – watch?v=, youtu.be/ und Shorts werden unterstützt';
+  }
+}
+
 function setType(type) {
   currentType = type;
   TYPES.forEach((t, i) => {
@@ -423,8 +439,33 @@ function setStep(n, state) {
   }
 }
 
+/* ─── YouTube URL Utilities ─────────────────────── */
+function extractYouTubeId(url) {
+  // Handles: watch?v=, youtu.be/, embed/, shorts/
+  const patterns = [
+    /[?&]v=([a-zA-Z0-9_-]{11})/,
+    /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+function cleanYouTubeUrl(url) {
+  const id = extractYouTubeId(url);
+  return id ? `https://www.youtube.com/watch?v=${id}` : url;
+}
+
 /* ─── Build H5P.InteractiveVideo content.json ───── */
 function buildInteractiveVideoContent(data, youtubeUrl) {
+  // Always store a clean URL – extra params (si=, ab_channel=, etc.)
+  // can break H5P's YouTube IFrame API initialisation
+  const cleanUrl = cleanYouTubeUrl(youtubeUrl);
+
   const interactions = (data.interactions || []).map(ix => {
     const subId   = uuid();
     const seconds = parseInt(ix.seconds) || 60;
@@ -506,7 +547,9 @@ function buildInteractiveVideoContent(data, youtubeUrl) {
       video: {
         startScreenOptions: { title: data.videoTitle || 'Interaktives Video', hideStartTitle:false },
         textTracks: { videoTrack:[] },
-        files: [{ path: youtubeUrl, mime:'video/YouTube', copyright:{ license:'U' }, aspectRatio:'16:9' }]
+        // No aspectRatio here – it's not part of the H5P.Video files spec
+        // and breaks the YouTube IFrame API handler in some H5P versions
+        files: [{ path: cleanUrl, mime:'video/YouTube', copyright:{ license:'U' } }]
       },
       assets: { interactions, bookmarks:[], endscreens:[] },
       summary: {
