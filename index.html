@@ -11,6 +11,7 @@
     --bg: #F7F4EF; --card: #FFFFFF; --accent: #D4501A; --accent-light: #F5E6DF;
     --text: #1C1C1A; --text-muted: #7A7A72; --border: #E2DAD0;
     --green: #3A7D44; --green-light: #EAF4EC; --blue: #2D6A8F; --blue-light: #E8F2F8;
+    --purple: #6040A0; --purple-light: #EEEBF8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 28px 16px 48px; max-width: 680px; margin: 0 auto; }
@@ -20,34 +21,48 @@
   .header h1 { font-family: 'Fraunces', serif; font-weight: 300; font-size: clamp(22px,4vw,28px); margin-bottom: 8px; }
   .header p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
 
-  .type-selector { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-  .type-btn { flex: 1; min-width: 100px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--card); cursor: pointer; text-align: center; transition: all .18s; font-family: 'DM Sans', sans-serif; }
-  .type-btn .type-icon { font-size: 20px; margin-bottom: 3px; }
-  .type-btn .type-name { font-size: 12px; font-weight: 500; color: var(--text); }
+  .type-selector { display: flex; gap: 7px; margin-bottom: 20px; flex-wrap: wrap; }
+  .type-btn { flex: 1; min-width: 85px; padding: 10px 10px; border: 1.5px solid var(--border); border-radius: 12px; background: var(--card); cursor: pointer; text-align: center; transition: all .18s; font-family: 'DM Sans', sans-serif; }
+  .type-btn .type-icon { font-size: 18px; margin-bottom: 3px; }
+  .type-btn .type-name { font-size: 11px; font-weight: 500; color: var(--text); line-height: 1.3; }
   .type-btn:hover { border-color: var(--accent); }
   .type-btn.active { border-color: var(--accent); background: var(--accent-light); }
+  .type-btn.ivideo-btn:hover { border-color: var(--purple); }
+  .type-btn.ivideo-btn.active { border-color: var(--purple); background: var(--purple-light); }
 
   .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
 
   label { display: block; font-size: 12px; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
 
-  input[type=text], textarea {
+  input[type=text], input[type=password], textarea {
     width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
     font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text); background: var(--bg);
     outline: none; transition: border-color .2s; margin-bottom: 14px;
   }
-  input[type=text]:focus, textarea:focus { border-color: var(--accent); background: white; }
+  input[type=text]:focus, input[type=password]:focus, textarea:focus { border-color: var(--accent); background: white; }
   textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 
-  .hint-box { background: var(--blue-light); border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--blue); line-height: 1.6; margin-bottom: 14px; border-left: 3px solid var(--blue); }
+  .hint-box { border-radius: 10px; padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 14px; border-left: 3px solid; }
+  .hint-box { background: var(--blue-light); color: var(--blue); border-color: var(--blue); }
+  .hint-box.purple { background: var(--purple-light); color: var(--purple); border-color: var(--purple); }
   .hint-box strong { font-weight: 500; }
 
   .example-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
   .chip { padding: 5px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 20px; font-size: 12px; color: var(--text-muted); cursor: pointer; transition: all .15s; }
   .chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
 
+  /* ivideo-specific fields */
+  .ivideo-fields { display: none; }
+  .ivideo-fields.visible { display: block; }
+  .url-row { position: relative; }
+  .url-row input[type=text] { padding-left: 40px; }
+  .url-row .url-icon { position: absolute; left: 13px; top: 13px; font-size: 15px; color: var(--text-muted); pointer-events: none; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 2px 0 14px; }
+
   .generate-btn { width: 100%; height: 52px; background: var(--accent); color: white; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; cursor: pointer; transition: all .18s; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .generate-btn:hover { background: #b8401a; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(212,80,26,.3); }
+  .generate-btn.ivideo-mode { background: var(--purple); }
+  .generate-btn.ivideo-mode:hover { background: #4d3290; box-shadow: 0 4px 16px rgba(96,64,160,.3); }
   .generate-btn:disabled { background: var(--border); color: var(--text-muted); transform: none; box-shadow: none; cursor: not-allowed; }
 
   .status-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 16px; display: none; }
@@ -56,6 +71,7 @@
   .step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-muted); }
   .step .dot { width: 24px; height: 24px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; transition: all .3s; }
   .step.active .dot { background: var(--accent); color: white; animation: pulse 1s infinite; }
+  .step.active.ivideo .dot { background: var(--purple); }
   .step.done .dot { background: var(--green); color: white; }
   .step.active { color: var(--text); font-weight: 500; }
   .step.done { color: var(--green); }
@@ -63,6 +79,12 @@
 
   .success-box { background: var(--green-light); border: 1px solid var(--green); border-radius: 12px; padding: 16px 20px; margin-top: 14px; font-size: 14px; color: var(--green); line-height: 1.6; display: none; }
   .error-box { background: #FDEDEC; border: 1px solid #C0392B; border-radius: 12px; padding: 16px 20px; margin-top: 14px; font-size: 14px; color: #C0392B; line-height: 1.6; display: none; }
+
+  .connection-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+  .connection-card .card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 12px; }
+  .connection-card label { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 5px; }
+  .connection-card input { padding: 10px 12px; font-size: 13px; margin-bottom: 10px; }
+  .connection-card input:last-child { margin-bottom: 0; }
 
   footer { text-align: center; margin-top: 32px; font-size: 11px; color: var(--text-muted); }
 </style>
@@ -88,6 +110,9 @@
   <button class="type-btn" onclick="setType('truefalse')">
     <div class="type-icon">⊙</div><div class="type-name">True / False</div>
   </button>
+  <button class="type-btn ivideo-btn" onclick="setType('ivideo')">
+    <div class="type-icon">▶</div><div class="type-name">Interakt. Video</div>
+  </button>
 </div>
 
 <div class="form-card">
@@ -103,8 +128,23 @@
   <div id="hint-truefalse" class="hint-box" style="display:none">
     <strong>True / False:</strong> Beschreibe das Thema. Claude formuliert eine klare Aussage und bestimmt, ob sie richtig oder falsch ist.
   </div>
+  <div id="hint-ivideo" class="hint-box purple" style="display:none">
+    <strong>Interaktives Video:</strong> YouTube-URL einfügen, Einsatzzweck beschreiben – Claude analysiert das Video und setzt automatisch 3–5 Verständnisfragen an didaktisch sinnvollen Stellen. Tipp: Zeitstempel in der Beschreibung erhöhen die Präzision.
+  </div>
 
-  <label>Dein Auftrag an Claude</label>
+  <!-- ivideo-specific fields (hidden for other types) -->
+  <div class="ivideo-fields" id="ivideo-fields">
+    <label>YouTube-URL</label>
+    <div class="url-row">
+      <span class="url-icon">▶</span>
+      <input type="text" id="youtube-url" placeholder="https://www.youtube.com/watch?v=...">
+    </div>
+    <label>Videobeschreibung mit Zeitstempeln <span style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--text-muted)">– optional, aber empfohlen</span></label>
+    <textarea id="video-desc" style="min-height:72px" placeholder="z.B.: 8-minütiges Erklärvideo zum SAMR-Modell. 0:00 Einleitung, 1:20 Substitution (analoge Werkzeuge ersetzen), 2:50 Augmentation, 4:30 Modification, 6:10 Redefinition, 7:30 Fazit."></textarea>
+    <hr class="divider">
+  </div>
+
+  <label id="prompt-label">Dein Auftrag an Claude</label>
   <textarea id="prompt" placeholder="z.B.: Erstelle einen Lückentext über das Schweizer Schulsystem für Lehrpersonen. Mache alle Kantone und Schulstufen als Lücken."></textarea>
 
   <label>Beispiele (anklicken zum Übernehmen)</label>
@@ -115,14 +155,14 @@
 </div>
 
 <button class="generate-btn" id="gen-btn" onclick="generate()">
-  <span>✦</span> Mit Claude generieren & herunterladen
+  <span id="gen-icon">✦</span> <span id="gen-label">Mit Claude generieren &amp; herunterladen</span>
 </button>
 
 <div class="status-box" id="status-box">
   <div class="status-steps">
-    <div class="step" id="step-1"><div class="dot">1</div><span>Claude generiert den Inhalt...</span></div>
-    <div class="step" id="step-2"><div class="dot">2</div><span>H5P-Struktur wird aufgebaut...</span></div>
-    <div class="step" id="step-3"><div class="dot">3</div><span>ZIP-Datei wird erstellt...</span></div>
+    <div class="step" id="step-1"><div class="dot">1</div><span id="step-1-text">Claude generiert den Inhalt...</span></div>
+    <div class="step" id="step-2"><div class="dot">2</div><span id="step-2-text">H5P-Struktur wird aufgebaut...</span></div>
+    <div class="step" id="step-3"><div class="dot">3</div><span id="step-3-text">ZIP-Datei wird erstellt...</span></div>
   </div>
 </div>
 
@@ -131,19 +171,22 @@
 </div>
 <div class="error-box" id="error-box"></div>
 
-<div style="background:white;border:1px solid #E2DAD0;border-radius:14px;padding:18px;margin-bottom:14px">
-  <div style="font-size:13px;font-weight:500;color:#1C1C1A;margin-bottom:12px">⚙ Verbindung</div>
-  <label style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#7A7A72;display:block;margin-bottom:5px">Worker-URL</label>
-  <input type="text" id="worker-url" placeholder="https://h5p-generator-proxy.david-halser.workers.dev" style="width:100%;padding:10px 12px;border:1.5px solid #E2DAD0;border-radius:9px;font-family:inherit;font-size:13px;color:#1C1C1A;background:#F7F4EF;outline:none;margin-bottom:10px">
-  <label style="font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:#7A7A72;display:block;margin-bottom:5px">Passwort</label>
-  <input type="password" id="access-token" placeholder="Zugangspasswort" style="width:100%;padding:10px 12px;border:1.5px solid #E2DAD0;border-radius:9px;font-family:inherit;font-size:13px;color:#1C1C1A;background:#F7F4EF;outline:none">
+<div class="connection-card">
+  <div class="card-title">⚙ Verbindung</div>
+  <label>Worker-URL</label>
+  <input type="text" id="worker-url" placeholder="https://h5p-generator-proxy.david-halser.workers.dev">
+  <label>Passwort</label>
+  <input type="password" id="access-token" placeholder="Zugangspasswort">
 </div>
 
 <footer>H5P KI-Generator · PHGR · David Halser · Powered by Claude</footer>
 
 <script>
+/* ─── State ─────────────────────────────────────── */
 let currentType = 'blanks';
+const TYPES = ['blanks','multichoice','accordion','truefalse','ivideo'];
 
+/* ─── Examples ──────────────────────────────────── */
 const EXAMPLES = {
   blanks: [
     'Lückentext über Fotosynthese für die Mittelstufe, alle Fachbegriffe als Lücken',
@@ -168,9 +211,16 @@ const EXAMPLES = {
     'True/False: KI kann kreatives Denken vollständig ersetzen',
     'Aussage über Lernstile – die Forschung widerspricht dem Mythos',
     'Frage über Bildschirmzeit und Lernleistung'
+  ],
+  ivideo: [
+    'Lehrpersonen sollen das SAMR-Modell kennenlernen und auf eigene Beispiele übertragen können',
+    'Einführung in KI: Wie funktioniert ChatGPT? Chancen und Risiken bewusstmachen',
+    'Datenschutz im Schulalltag – wichtigste Konzepte und Beispiele merken',
+    'Flipped Classroom: Schüler/innen sollen Grundprinzipien vor der Lektion verstanden haben'
   ]
 };
 
+/* ─── System Prompts ────────────────────────────── */
 const SYSTEM_PROMPTS = {
   blanks: `Du bist ein H5P-Content-Generator. Erstelle einen H5P.Blanks Lückentext.
 Gib NUR ein valides JSON-Objekt zurück – kein Markdown, keine Erklärung, kein Code-Block.
@@ -252,36 +302,102 @@ Format:
   "confirmRetry": {"header": "Bist du sicher?", "body": "Nochmal versuchen?", "cancelLabel": "Abbrechen", "confirmLabel": "Ja"}
 }
 
-"correct" ist entweder "true" oder "false". Auf Deutsch.`
+"correct" ist entweder "true" oder "false". Auf Deutsch.`,
+
+  ivideo: `Du bist ein H5P Interactive Video Generator für Schweizer Volksschulen.
+
+Der Benutzer gibt dir eine YouTube-URL, einen didaktischen Einsatzzweck und optional eine Videobeschreibung mit Zeitstempeln.
+
+DEINE AUFGABE:
+1. Analysiere das Video anhand deines Wissens oder der gegebenen Beschreibung
+2. Wähle 3–5 Zeitpunkte, an denen Verständnisfragen didaktisch sinnvoll sind
+3. Erstelle für jeden Zeitpunkt eine passende Frage (Multiple Choice ODER True/False)
+4. Gib NUR ein JSON-Objekt zurück – kein Markdown, kein Code-Block, keine Erklärung
+
+ZEITSTEMPEL: Immer in Sekunden (45 = 0:45, 150 = 2:30, 310 = 5:10)
+FRAGEN: Echtes Verständnis prüfen, nicht nur Faktenwiedergabe
+SPRACHE: Deutsch
+
+RÜCKGABE-FORMAT (NUR dieses JSON, nichts davor oder danach):
+{
+  "videoTitle": "Titel des Videos",
+  "interactions": [
+    {
+      "seconds": 90,
+      "type": "multichoice",
+      "question": "Was beschreibt die Substitution-Stufe im SAMR-Modell?",
+      "answers": [
+        {"text": "Digitale Werkzeuge ersetzen analoge ohne zusätzlichen Mehrwert", "correct": true},
+        {"text": "Digitale Medien ermöglichen völlig neue Lernformen", "correct": false},
+        {"text": "Schüler/innen entwickeln eigene digitale Produkte", "correct": false},
+        {"text": "Der Unterricht wird grundlegend neu strukturiert", "correct": false}
+      ]
+    },
+    {
+      "seconds": 210,
+      "type": "truefalse",
+      "question": "Beim SAMR-Modell sind alle vier Stufen gleichwertig – keine ist didaktisch wertvoller als eine andere.",
+      "correct": "false"
+    }
+  ]
+}
+
+REGELN:
+- 3–5 Interaktionen, gut über das Video verteilt
+- Erster Zeitstempel frühestens nach 30 Sekunden
+- Multiple Choice: genau 1 richtige Antwort, 3–4 Optionen total
+- True/False "correct"-Wert ist immer der String "true" oder "false"
+- Falls das Video unbekannt: thematisch passende Fragen auf Basis des Einsatzzwecks erstellen`
 };
 
+/* ─── Dependencies ──────────────────────────────── */
 const DEPS = {
-  blanks: [{machineName:'H5P.Blanks', majorVersion:'1', minorVersion:'14'}],
-  multichoice: [{machineName:'H5P.MultiChoice', majorVersion:'1', minorVersion:'16'}],
-  accordion: [
+  blanks:     [{machineName:'H5P.Blanks', majorVersion:'1', minorVersion:'14'}],
+  multichoice:[{machineName:'H5P.MultiChoice', majorVersion:'1', minorVersion:'16'}],
+  accordion:  [
     {machineName:'H5P.Accordion', majorVersion:'1', minorVersion:'0'},
     {machineName:'H5P.AdvancedText', majorVersion:'1', minorVersion:'1'}
   ],
-  truefalse: [{machineName:'H5P.TrueFalse', majorVersion:'1', minorVersion:'8'}]
+  truefalse:  [{machineName:'H5P.TrueFalse', majorVersion:'1', minorVersion:'8'}],
+  ivideo: [
+    {machineName:'H5P.InteractiveVideo', majorVersion:'1', minorVersion:'26'},
+    {machineName:'H5P.Video',            majorVersion:'1', minorVersion:'6'},
+    {machineName:'H5P.MultiChoice',      majorVersion:'1', minorVersion:'16'},
+    {machineName:'H5P.TrueFalse',        majorVersion:'1', minorVersion:'8'},
+    {machineName:'H5P.Summary',          majorVersion:'1', minorVersion:'10'},
+    {machineName:'H5P.AdvancedText',     majorVersion:'1', minorVersion:'1'}
+  ]
 };
 
+/* ─── Helpers ───────────────────────────────────── */
 function uuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+    const r = Math.random()*16|0;
+    return (c==='x' ? r : (r&0x3|0x8)).toString(16);
   });
 }
 
 function setType(type) {
   currentType = type;
-  document.querySelectorAll('.type-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['blanks','multichoice','accordion','truefalse'][i] === type);
+  TYPES.forEach((t, i) => {
+    document.querySelectorAll('.type-btn')[i].classList.toggle('active', t === type);
   });
-  ['blanks','multichoice','accordion','truefalse'].forEach(t => {
+  TYPES.forEach(t => {
     document.getElementById(`hint-${t}`).style.display = t === type ? 'block' : 'none';
   });
+  document.getElementById('ivideo-fields').classList.toggle('visible', type === 'ivideo');
+  document.getElementById('prompt-label').textContent =
+    type === 'ivideo' ? 'Didaktischer Einsatzzweck' : 'Dein Auftrag an Claude';
+  document.getElementById('gen-btn').classList.toggle('ivideo-mode', type === 'ivideo');
+  document.getElementById('gen-icon').textContent  = type === 'ivideo' ? '▶' : '✦';
+  document.getElementById('gen-label').textContent = type === 'ivideo'
+    ? 'Video analysieren & H5P erstellen'
+    : 'Mit Claude generieren & herunterladen';
   renderChips();
   document.getElementById('prompt').value = '';
-  document.getElementById('prompt').placeholder = EXAMPLES[type][0];
+  document.getElementById('prompt').placeholder = type === 'ivideo'
+    ? 'z.B.: Lehrpersonen sollen das SAMR-Modell verstehen und auf eigene Situationen übertragen können'
+    : EXAMPLES[type][0];
 }
 
 function renderChips() {
@@ -297,17 +413,174 @@ function renderChips() {
 }
 
 function setStep(n, state) {
+  const isIvideo = currentType === 'ivideo';
   for (let i = 1; i <= 3; i++) {
     const el = document.getElementById(`step-${i}`);
-    el.className = 'step' + (i === n ? ` ${state}` : i < n ? ' done' : '');
+    el.className = 'step'
+      + (i === n ? ` ${state}${isIvideo ? ' ivideo' : ''}` : '')
+      + (i < n  ? ' done' : '');
     el.querySelector('.dot').textContent = i < n ? '✓' : i;
   }
 }
 
+/* ─── Build H5P.InteractiveVideo content.json ───── */
+function buildInteractiveVideoContent(data, youtubeUrl) {
+  const interactions = (data.interactions || []).map(ix => {
+    const subId   = uuid();
+    const seconds = parseInt(ix.seconds) || 60;
+    let action;
+
+    if (ix.type === 'truefalse') {
+      action = {
+        library: 'H5P.TrueFalse 1.8',
+        params: {
+          media: { type: { params: {} }, disableImageZooming: false },
+          correct: ix.correct || 'true',
+          question: ix.question || '',
+          l10n: {
+            trueText:'Richtig', falseText:'Falsch',
+            score:'Du hast @score von @total Punkten.',
+            checkAnswer:'Überprüfen', showSolutionButton:'Lösung anzeigen', tryAgain:'Nochmal',
+            wrongAnswerMessage:'Leider falsch.', correctAnswerMessage:'Richtig!',
+            trueAnswerText:"Die korrekte Antwort ist 'Richtig'",
+            falseAnswerText:"Die korrekte Antwort ist 'Falsch'"
+          },
+          behaviour: { enableRetry:true, enableSolutionsButton:true, confirmCheckDialog:false, confirmRetryDialog:false, autoCheck:false },
+          confirmCheck: { header:'Bist du sicher?', body:'Antwort abschicken?', cancelLabel:'Abbrechen', confirmLabel:'Ja' },
+          confirmRetry: { header:'Bist du sicher?', body:'Nochmal versuchen?', cancelLabel:'Abbrechen', confirmLabel:'Ja' }
+        },
+        subContentId: subId,
+        metadata: { contentType:'True/False Question', license:'U', title: ix.question || 'Frage' }
+      };
+    } else {
+      const answers = (ix.answers || []).map(a => ({
+        correct: !!a.correct,
+        tipsAndFeedback: { tip:'', chosenFeedback:'', notChosenFeedback:'' },
+        params: { correct: !!a.correct, text: a.text || '' }
+      }));
+      action = {
+        library: 'H5P.MultiChoice 1.16',
+        params: {
+          media: { type: { params:{} }, disableImageZooming:false },
+          answers,
+          question: `<p>${ix.question || ''}</p>`,
+          behaviour: {
+            enableRetry:true, enableSolutionsButton:true, enableCheckButton:true,
+            type:'auto', singlePoint:false, randomAnswers:true,
+            showSolutionsRequiresInput:true, confirmCheckDialog:false,
+            confirmRetryDialog:false, autoCheck:false, passPercentage:100, showScorePoints:true
+          },
+          UI: {
+            checkAnswerButton:'Überprüfen', showSolutionButton:'Lösung anzeigen',
+            tryAgainButton:'Nochmal', scoreBarLabel:'Du hast :num von :total Punkten.'
+          },
+          confirmCheck: { header:'Bist du sicher?', body:'Antwort abschicken?', cancelLabel:'Abbrechen', confirmLabel:'Ja' },
+          confirmRetry: { header:'Bist du sicher?', body:'Nochmal versuchen?', cancelLabel:'Abbrechen', confirmLabel:'Ja' },
+          overallFeedback: [{ from:0, to:100, feedback:'' }]
+        },
+        subContentId: subId,
+        metadata: { contentType:'Multiple Choice', license:'U', title: ix.question || 'Frage' }
+      };
+    }
+
+    return {
+      x:25, y:25, width:50, height:50,
+      duration: { from: seconds, to: seconds },
+      libraryTitle: ix.type === 'truefalse' ? 'True/False Question' : 'Multiple Choice',
+      action,
+      pause: true,
+      displayType: 'button',
+      buttonOnMobile: false,
+      label: '',
+      goto: { type:'timecode', value:'' },
+      adaptivity: {
+        correct:  { allowOptionalFullScore:false, message:'' },
+        wrong:    { allowOptionalFullScore:false, message:'' },
+        requireCompletion: false
+      }
+    };
+  });
+
+  return {
+    interactiveVideo: {
+      video: {
+        startScreenOptions: { title: data.videoTitle || 'Interaktives Video', hideStartTitle:false },
+        textTracks: { videoTrack:[] },
+        files: [{ path: youtubeUrl, mime:'video/YouTube', copyright:{ license:'U' }, aspectRatio:'16:9' }]
+      },
+      assets: { interactions, bookmarks:[], endscreens:[] },
+      summary: {
+        task: {
+          library: 'H5P.Summary 1.10',
+          params: {
+            intro: 'Wähle alle korrekten Aussagen aus:',
+            summaries: [{ summary:[], subContentId: uuid() }],
+            overallFeedback: [{ from:0, to:100 }],
+            solvedLabel:'Fortschritt:', scoreLabel:'Falsche Antworten:',
+            resultLabel:'Dein Ergebnis', labelCorrect:'Richtig.',
+            labelIncorrect:'Falsch! Bitte nochmals versuchen.',
+            alternativeIncorrectLabel:'Falsch', labelCorrectAnswers:'Richtige Antworten.',
+            tipButtonLabel:'Tipp anzeigen',
+            scoreBarLabel:'Du hast :num von :total Punkten',
+            progressText:'Fortschritt :num von :total'
+          },
+          subContentId: uuid()
+        },
+        displayAt: 3
+      }
+    },
+    override: { autoplay:false, loop:false, showBookmarksmenuOnLoad:false, showRewind10:false, preventSkipping:false, deactivateSound:false },
+    l10n: {
+      interaction:'Interaktion', play:'Abspielen', pause:'Pause',
+      mute:'Stummschalten', unmute:'Ton einschalten', quality:'Videoqualität',
+      captions:'Untertitel', close:'Schliessen', fullscreen:'Vollbild',
+      exitFullscreen:'Vollbild beenden', summary:'Zusammenfassung öffnen',
+      bookmarks:'Lesezeichen', endscreen:'Abschlussseite',
+      defaultAdaptivitySeekLabel:'Weiter zu', continueWithVideo:'Weiter mit dem Video',
+      playbackRate:'Abspielgeschwindigkeit', rewind10:'10 Sekunden zurück',
+      navDisabled:'Navigation ist deaktiviert',
+      navForwardDisabled:'Vorwärts-Navigation ist deaktiviert',
+      sndDisabled:'Ton ist deaktiviert',
+      requiresCompletionWarning:'Du musst alle Fragen beantworten, bevor du weitermachst.',
+      back:'Zurück', hours:'Stunden', minutes:'Minuten', seconds:'Sekunden',
+      currentTime:'Aktuelle Zeit:', totalTime:'Gesamtzeit:',
+      singleInteractionAnnouncement:'Interaktion erschien:',
+      multipleInteractionsAnnouncement:'Mehrere Interaktionen erschienen.',
+      videoPausedAnnouncement:'Video pausiert', content:'Inhalt',
+      answered:':num beantwortet', endcardButtonLabel:'Nochmals abspielen',
+      endcardTitle:'@answered Frage(n) beantwortet',
+      endcardInformation:'Du hast @answered von @total Fragen beantwortet.',
+      endcardInformationNoAnswers:'Du hast keine Fragen beantwortet.',
+      endcardInformationMustHaveAnswer:'Du musst mindestens eine Frage beantworten.',
+      endcardSubmitButton:'Absenden', endcardSubmitMessage:'Deine Antworten wurden eingereicht!',
+      endcardTableRowAnswered:'Beantwortet', endcardTableRowScore:'Bewertung',
+      endcardAnsweredScore:'beantwortet',
+      tableRowAnsweredWithScore:'@answered beantwortet mit @score Punkten.',
+      touchInputLabel:'Tippe zweimal auf Enter für die Eingabe'
+    }
+  };
+}
+
+/* ─── Main Generate Function ────────────────────── */
 async function generate() {
   const prompt = document.getElementById('prompt').value.trim();
-  const title = document.getElementById('h5p-title').value.trim() || 'H5P Inhalt';
+  const title  = document.getElementById('h5p-title').value.trim() || 'H5P Inhalt';
   if (!prompt) { alert('Bitte beschreibe, was du möchtest.'); return; }
+
+  const workerUrl   = document.getElementById('worker-url').value.trim();
+  const accessToken = document.getElementById('access-token').value.trim();
+  if (!workerUrl || !accessToken) {
+    alert('Bitte Worker-URL und Passwort im Verbindungsbereich eingeben.');
+    return;
+  }
+
+  if (currentType === 'ivideo') {
+    const ytUrl = document.getElementById('youtube-url').value.trim();
+    if (!ytUrl || !(ytUrl.includes('youtube.com') || ytUrl.includes('youtu.be'))) {
+      alert('Bitte eine gültige YouTube-URL eingeben.');
+      return;
+    }
+  }
 
   const btn = document.getElementById('gen-btn');
   btn.disabled = true;
@@ -315,70 +588,109 @@ async function generate() {
   const statusBox = document.getElementById('status-box');
   statusBox.className = 'status-box visible';
   document.getElementById('success-box').style.display = 'none';
-  document.getElementById('error-box').style.display = 'none';
+  document.getElementById('error-box').style.display  = 'none';
+
+  if (currentType === 'ivideo') {
+    document.getElementById('step-1-text').textContent = 'Claude analysiert das Video und erstellt Fragen...';
+    document.getElementById('step-2-text').textContent = 'Interactive Video Struktur wird aufgebaut...';
+    document.getElementById('step-3-text').textContent = 'ZIP-Datei wird erstellt...';
+  } else {
+    document.getElementById('step-1-text').textContent = 'Claude generiert den Inhalt...';
+    document.getElementById('step-2-text').textContent = 'H5P-Struktur wird aufgebaut...';
+    document.getElementById('step-3-text').textContent = 'ZIP-Datei wird erstellt...';
+  }
 
   setStep(1, 'active');
 
   try {
-    const workerUrl = document.getElementById('worker-url').value.trim();
-    const accessToken = document.getElementById('access-token').value.trim();
-    if (!workerUrl || !accessToken) throw new Error('Bitte Worker-URL und Passwort eingeben.');
-
-    const response = await fetch(workerUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Access-Token': accessToken
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        system: SYSTEM_PROMPTS[currentType],
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    const data = await response.json();
-    const rawText = data.content?.[0]?.text || '';
-
-    setStep(2, 'active');
-
-    // JSON robust extrahieren
     let contentJson;
-    try {
+
+    /* ── Interactive Video Path ── */
+    if (currentType === 'ivideo') {
+      const ytUrl     = document.getElementById('youtube-url').value.trim();
+      const videoDesc = document.getElementById('video-desc').value.trim();
+
+      const userMessage = [
+        `YouTube-URL: ${ytUrl}`,
+        `Didaktischer Einsatzzweck: ${prompt}`,
+        videoDesc ? `\nVideobeschreibung mit Zeitstempeln:\n${videoDesc}` : ''
+      ].join('\n');
+
+      const response = await fetch(workerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Token': accessToken },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 2000,
+          system: SYSTEM_PROMPTS.ivideo,
+          messages: [{ role: 'user', content: userMessage }]
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || `HTTP ${response.status}`);
+
+      const rawText = (data.content || [])
+        .filter(b => b.type === 'text').map(b => b.text).join('');
+
+      setStep(2, 'active');
+
+      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      let claudeData;
+      try {
+        claudeData = JSON.parse(cleaned);
+      } catch(e) {
+        throw new Error('Claude hat kein valides JSON zurückgegeben. Füge eine Videobeschreibung hinzu und versuche es nochmals.');
+      }
+      if (!claudeData.interactions || claudeData.interactions.length === 0) {
+        throw new Error('Keine Interaktionen generiert. Bitte Videobeschreibung ergänzen.');
+      }
+
+      contentJson = buildInteractiveVideoContent(claudeData, ytUrl);
+
+    /* ── Standard H5P Types Path ── */
+    } else {
+      const response = await fetch(workerUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Token': accessToken },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: SYSTEM_PROMPTS[currentType],
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || `HTTP ${response.status}`);
+
+      const rawText = data.content?.[0]?.text || '';
+
+      setStep(2, 'active');
+
       const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       try {
         contentJson = JSON.parse(cleaned);
       } catch(e) {
-        const start = cleaned.indexOf('{');
-        const end = cleaned.lastIndexOf('}');
-        if (start === -1 || end === -1) throw new Error('Kein JSON gefunden');
-        contentJson = JSON.parse(cleaned.slice(start, end + 1));
+        throw new Error('Claude hat kein valides JSON zurückgegeben. Versuche es nochmals.');
       }
-    } catch(e) {
-      throw new Error('Claude hat kein valides JSON zurückgegeben – nochmals versuchen.');
-    }
 
-    // UUIDs für Accordion-Panels ersetzen
-    if (currentType === 'accordion' && contentJson.panels) {
-      contentJson.panels.forEach((p, i) => {
-        if (p.content) p.content.subContentId = uuid();
-      });
+      if (currentType === 'accordion' && contentJson.panels) {
+        contentJson.panels.forEach(p => { if (p.content) p.content.subContentId = uuid(); });
+      }
     }
 
     setStep(3, 'active');
 
-    // H5P JSON bauen
     const h5pJson = {
       title,
       language: 'U',
       mainLibrary: DEPS[currentType][0].machineName,
       license: 'U',
-      embedTypes: ['div'],
+      embedTypes: currentType === 'ivideo' ? ['iframe'] : ['div'],
       preloadedDependencies: DEPS[currentType]
     };
 
-    // ZIP erstellen
     const zip = new JSZip();
     zip.file('h5p.json', JSON.stringify(h5pJson, null, 2));
     zip.file('content/content.json', JSON.stringify(contentJson, null, 2));
@@ -406,7 +718,7 @@ async function generate() {
   btn.disabled = false;
 }
 
-// Init
+/* ─── Init ──────────────────────────────────────── */
 renderChips();
 </script>
 </body>
